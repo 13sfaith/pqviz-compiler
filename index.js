@@ -1,12 +1,12 @@
 import babel from "@babel/core";
-import plugin from "./test-plugin.js";
+import plugin from "./instrumentation/function-start.js";
 import fastGlob from "fast-glob";
 import { useTmpDir } from "use-tmpdir";
 import fs from "fs";
 import fsPromises from "fs/promises";
 import path from 'path';
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
