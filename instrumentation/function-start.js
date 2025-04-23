@@ -1,3 +1,4 @@
+import { classMethod } from "@babel/types";
 import { arrowFunctionExpression, classDeclaration } from "@babel/types";
 import { functionDeclaration } from "@babel/types";
 
@@ -69,6 +70,11 @@ export default function ({ types: t }) {
         }
         const consoleLogCall = buildConsoleLogStatement(path, state, t, '[TLS]')
         path.unshiftContainer('body', t.expressionStatement(consoleLogCall))
+      },
+      ClassMethod(path, state) {
+        const functionName = path.node.key.name || "Unnamed Class Method"
+        const consoleLogCall = buildConsoleLogStatement(path, state, t, functionName)
+        path.get('body').unshiftContainer('body', t.expressionStatement(consoleLogCall))
       },
       FunctionDeclaration(path, state) {
         const consoleLogCall = buildConsoleLogStatement(path, state, t)
