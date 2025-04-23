@@ -57,6 +57,7 @@ export default function ({ types: t }) {
       Program(path, state) {
         const topLevelNonDeclarations = path.node.body.filter(
           (node) =>
+            !t.isClassDeclaration(node) &&
             !t.isFunctionDeclaration(node) &&
             !t.isVariableDeclaration(node) &&
             !t.isImportDeclaration(node) &&

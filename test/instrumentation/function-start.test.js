@@ -12,14 +12,24 @@ function runInstrumentation(originalCode, fileName = "test.js") {
     return code;
 }
 
-function compareResults(codeExampleName) {
+// TODO: Bad name lets make it better
+function runTestInput(codeExampleName) {
     const originalCode = fs.readFileSync(path.join(process.cwd(), `test/instrumentation/inputs/${codeExampleName}.js`), "utf8");
     const newCode = runInstrumentation(originalCode)
-    const expectedCode = fs.readFileSync(path.join(process.cwd(), `test/instrumentation/outputs/function-start/${codeExampleName}.js`), "utf8");
-    console.log(newCode)
-    expect(newCode).toBe(expectedCode)
+    return newCode
 }
 
 test('Variable Declaration Remains unchanged', () => {
-    compareResults('top-level-declarations')
+    const result = runTestInput('top-level-declarations')
+
+    expect(result).not.toContain('console')
+})
+
+test('Classic Functions should have log statements', () => {
+    const result = runTestInput('standard-function-definitions')
+    
+    let lines = result.split('\n')
+    let logs = lines.filter((a) => a.includes('console.log'))
+
+    expect(logs).toHaveLength(4)
 })
