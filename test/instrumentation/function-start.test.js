@@ -56,3 +56,11 @@ test('Logs record the pre-instrumented function declaration line numbers', () =>
     expect(logs[0]).toContain("1")
     expect(logs[3]).toContain("14")
 })
+
+test('unnamed default function should be logged', () => {
+    const result = runTestInput('default-function')
+
+    const logs = extractLogsFromInstrumentedCode(result)
+
+    expect(logs).toHaveLength(1)
+})

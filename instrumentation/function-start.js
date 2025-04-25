@@ -15,7 +15,7 @@ function buildConsoleLogStatement(path, state, t, specialType) {
   return consoleLogCall
 }
 
-function findArrowFunctionName(path, t) {
+function findFunctionName(path, t) {
   let current = path;
 
   while (current) {
@@ -78,12 +78,13 @@ export default function ({ types: t }) {
         path.get('body').unshiftContainer('body', t.expressionStatement(consoleLogCall))
       },
       FunctionDeclaration(path, state) {
-        const consoleLogCall = buildConsoleLogStatement(path, state, t)
+        let functionName = findFunctionName(path, t)
+        const consoleLogCall = buildConsoleLogStatement(path, state, t, functionName)
         path.get('body').unshiftContainer('body', t.expressionStatement(consoleLogCall))
       },
       ArrowFunctionExpression(path, state) {
         const body = path.get('body');
-        let functionName = findArrowFunctionName(path, t)
+        let functionName = findFunctionName(path, t)
         const consoleLogCall = buildConsoleLogStatement(path, state, t, functionName)
 
         if (!t.isBlockStatement(body.node)) {
