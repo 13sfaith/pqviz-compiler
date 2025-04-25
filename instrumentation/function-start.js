@@ -1,7 +1,3 @@
-import { classMethod } from "@babel/types";
-import { arrowFunctionExpression, classDeclaration } from "@babel/types";
-import { functionDeclaration } from "@babel/types";
-
 function buildConsoleLogStatement(path, state, t, specialType) {
   let consoleLogMember = t.memberExpression(t.identifier("console"), t.identifier("log"))
   let consoleStr = ''
