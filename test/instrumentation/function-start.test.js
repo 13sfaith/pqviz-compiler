@@ -19,6 +19,13 @@ function runTestInput(codeExampleName) {
     return newCode
 }
 
+function extractLogsFromInstrumentedCode(instrumentedCode) {
+    let lines = instrumentedCode.split('\n')
+    let logs = lines.filter((a) => a.includes('console.log'))
+
+    return logs
+}
+
 test('Variable Declaration Remains unchanged', () => {
     const result = runTestInput('top-level-declarations')
 
@@ -28,8 +35,24 @@ test('Variable Declaration Remains unchanged', () => {
 test('Classic Functions should have log statements', () => {
     const result = runTestInput('standard-function-definitions')
     
-    let lines = result.split('\n')
-    let logs = lines.filter((a) => a.includes('console.log'))
+    const logs = extractLogsFromInstrumentedCode(result)
 
     expect(logs).toHaveLength(4)
+})
+
+test('Arrow Functions should have log statements', () => {
+    const result = runTestInput('arrow-function-definitions')
+
+    const logs = extractLogsFromInstrumentedCode(result)
+
+    expect(logs).toHaveLength(4)
+})
+
+test('Logs record the pre-instrumented function declaration line numbers', () => {
+    const result = runTestInput('standard-function-definitions')
+    
+    const logs = extractLogsFromInstrumentedCode(result)
+
+    expect(logs[0]).toContain("1")
+    expect(logs[3]).toContain("14")
 })

@@ -73,17 +73,3 @@ useTmpDir(async (dir) => {
   }
    
 })
-
-/*
-const originalCode = fs.readFileSync("./input.js", "utf8");
-console.log("============= BEFORE =============")
-console.log(originalCode)
-
-var { code } = babel.transformSync(originalCode, {
-  plugins: [plugin],
-  configFile: false
-});
-
-console.log("\n\n============= AFTER =============")
-console.log(code)
-*/
