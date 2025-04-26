@@ -26,7 +26,6 @@ function extractLogsFromInstrumentedCode(instrumentedCode) {
     return logs
 }
 
-/*
 test('Variable Declaration Remains unchanged', () => {
     const result = runTestInput('top-level-declarations')
 
@@ -57,7 +56,6 @@ test('Logs record the pre-instrumented function declaration line numbers', () =>
     expect(logs[0]).toContain("1")
     expect(logs[3]).toContain("14")
 })
-*/
 
 test('unnamed default function should be logged', () => {
     const result = runTestInput('default-function')
