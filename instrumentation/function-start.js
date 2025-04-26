@@ -14,6 +14,10 @@ function buildConsoleLogStatement(path, state, t, specialType) {
 function findFunctionName(path, t) {
   let current = path;
 
+  if (current.node?.id?.name != null) {
+    return current.node.id.name
+  }
+
   while (current) {
     const parent = current.parentPath;
     if (!parent) break;
