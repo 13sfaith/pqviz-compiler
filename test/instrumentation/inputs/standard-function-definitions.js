@@ -5,6 +5,7 @@ function foo() {
 
 async function bar() {
     let b = 20
+    let someValue = foo()
 }
 
 class BlankSlate {

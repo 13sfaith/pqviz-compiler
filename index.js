@@ -7,6 +7,7 @@ import fsPromises from "fs/promises";
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { paths } from '#config';
 
 const execAsync = promisify(exec);
 
@@ -32,7 +33,9 @@ async function createSymlink(target, linkPath, type = 'file') {
   }
 }
 
-useTmpDir(async (dir) => {
+let calls = []
+
+await useTmpDir(async (dir) => {
   let fileNames = await fastGlob.glob(["**/**.js"], { ignore: ["node_modules/**"]})
 
   for (let i = 0; i < fileNames.length; i++) {
@@ -55,6 +58,11 @@ useTmpDir(async (dir) => {
   await createSymlink("package.json", path.join(dir, "package.json"), "file")
   await createSymlink("package-lock.json", path.join(dir, "package-lock.json"), "file")
 
+  // bring in the monitor! 🦎
+  makeDirectory(dir, paths.relativeMonitorPath)
+  const monitorCode = fs.readFileSync(paths.absoluteMonitorPath, "utf8");
+  fs.writeFileSync(path.join(dir, paths.relativeMonitorPath), monitorCode)
+
   // build args
   let userArgs = process.argv.splice(2)
   let userCommand = userArgs.join(' ')
@@ -65,11 +73,15 @@ useTmpDir(async (dir) => {
     console.log(stdout)
     console.error(stderr)
 
-    console.log(stderr.split('\n').filter((a) => a.includes('[ast]')))
-    
+
+    const traceJson = fs.readFileSync(path.join(dir, 'trace.json'), "utf8");
+    calls = JSON.parse(traceJson)
 
   } catch (err) {
     console.error(err)
   }
    
 })
+
+console.log(calls)
+fs.writeFileSync('trace.json', JSON.stringify(calls))

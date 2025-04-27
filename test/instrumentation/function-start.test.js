@@ -26,49 +26,8 @@ function extractLogsFromInstrumentedCode(instrumentedCode) {
     return logs
 }
 
-/*
-test('Variable Declaration Remains unchanged', () => {
-    const result = runTestInput('top-level-declarations')
-
-    expect(result).not.toContain('console')
-})
-
-test('Classic Functions should have log statements', () => {
-    const result = runTestInput('standard-function-definitions')
-    
-    const logs = extractLogsFromInstrumentedCode(result)
-
-    expect(logs).toHaveLength(4)
-})
-
-test('Arrow Functions should have log statements', () => {
-    const result = runTestInput('arrow-function-definitions')
-
-    const logs = extractLogsFromInstrumentedCode(result)
-
-    expect(logs).toHaveLength(4)
-})
-
-test('Logs record the pre-instrumented function declaration line numbers', () => {
-    const result = runTestInput('standard-function-definitions')
-    
-    const logs = extractLogsFromInstrumentedCode(result)
-
-    expect(logs[0]).toContain("1")
-    expect(logs[3]).toContain("14")
-})
-
-test('unnamed default function should be logged', () => {
-    const result = runTestInput('default-function')
-
-    const logs = extractLogsFromInstrumentedCode(result)
-
-    expect(logs).toHaveLength(1)
-})
-*/
-
 test('not sure yet', () => {
-    const result = runTestInput('standard-function-definitions')
+    const result = runTestInput('arrow-function-definitions')
 
     console.log(result)
 })
