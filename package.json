@@ -8,6 +8,9 @@
     "start": "node index.js",
     "build": "babel src -d lib"
   },
+  "imports": {
+    "#config": "./config.js"
+  },
   "author": "",
   "license": "ISC",
   "description": "",

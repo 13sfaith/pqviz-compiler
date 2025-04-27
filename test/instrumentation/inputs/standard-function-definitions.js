@@ -1,5 +1,6 @@
 function foo() {
     let a = 10
+    bar()
 }
 
 async function bar() {
@@ -9,6 +10,7 @@ async function bar() {
 class BlankSlate {
     inAClass() {
         let c = 30
+        this.inAClassButWeirder()
     }
 
     async inAClassButWeirder() {

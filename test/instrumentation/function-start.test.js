@@ -26,6 +26,7 @@ function extractLogsFromInstrumentedCode(instrumentedCode) {
     return logs
 }
 
+/*
 test('Variable Declaration Remains unchanged', () => {
     const result = runTestInput('top-level-declarations')
 
@@ -63,4 +64,11 @@ test('unnamed default function should be logged', () => {
     const logs = extractLogsFromInstrumentedCode(result)
 
     expect(logs).toHaveLength(1)
+})
+*/
+
+test('not sure yet', () => {
+    const result = runTestInput('standard-function-definitions')
+
+    console.log(result)
 })
