@@ -15,11 +15,4 @@ function addEvent(props) {
     fs.writeFileSync('trace.json', newTraceJson)
 }
 
-/*
-process.on('exit', () => {
-    const jsonStr = JSON.stringify(calls, null, 2)
-    fs.writeFileSync('trace.json', jsonStr)
-})
-*/
-
 export default { addEvent }
