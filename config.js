@@ -6,5 +6,5 @@ const __dirname = dirname(__filename)
 
 export const paths = {
     relativeMonitorPath: "pqviz/monitor.js",
-    absoluteMonitorPath: resolve(__dirname, "monitor/monitor.js")
+    monitorDirectory: resolve(__dirname, "monitor")
 }

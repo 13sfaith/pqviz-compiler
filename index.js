@@ -25,9 +25,12 @@ async function createSymlink(target, linkPath, type = 'file') {
   const platformType = process.platform === 'win32' ? 'junction' : type;
 
   try {
-    let fullTargetPath = path.join(process.cwd(), target)
+    let fullTargetPath = target
+    if (target[0] !== '/') {
+      fullTargetPath = path.join(process.cwd(), target)
+    }
     await fsPromises.symlink(fullTargetPath, linkPath, platformType)
-    console.log(`Symlink created: ${linkPath} → ${target}`);
+    console.log(`Symlink created: ${linkPath} → ${fullTargetPath}`);
   } catch (err) {
     console.error('Failed to create symlink:', err);
   }
@@ -59,16 +62,16 @@ await useTmpDir(async (dir) => {
   await createSymlink("package-lock.json", path.join(dir, "package-lock.json"), "file")
 
   // bring in the monitor! 🦎
-  makeDirectory(dir, paths.relativeMonitorPath)
-  const monitorCode = fs.readFileSync(paths.absoluteMonitorPath, "utf8");
-  fs.writeFileSync(path.join(dir, paths.relativeMonitorPath), monitorCode)
+  // makeDirectory(dir, paths.monitorDirectory)
+  await createSymlink(paths.monitorDirectory, path.join(dir, "pqviz"))
 
   // build args
   let userArgs = process.argv.splice(2)
   let userCommand = userArgs.join(' ')
 
   try {
-    let { stdout, stderr } = await execAsync(userCommand, { cwd: path.join(dir)})
+    const nodeOptions = "--import \"data:text/javascript,import { register } from \\\"node:module\\\"; import { pathToFileURL } from \\\"node:url\\\"; register(\\\"./pqviz/loader.js\\\", pathToFileURL(\\\"./\\\"));\""
+    let { stdout, stderr } = await execAsync(userCommand, { cwd: path.join(dir), env: { ...process.env, 'NODE_OPTIONS': nodeOptions }})
 
     console.log(stdout)
     console.error(stderr)
@@ -83,5 +86,4 @@ await useTmpDir(async (dir) => {
    
 })
 
-console.log(calls)
 fs.writeFileSync('trace.json', JSON.stringify(calls))

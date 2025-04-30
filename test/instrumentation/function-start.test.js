@@ -27,7 +27,7 @@ function extractLogsFromInstrumentedCode(instrumentedCode) {
 }
 
 test('not sure yet', () => {
-    const result = runTestInput('arrow-function-definitions')
+    const result = runTestInput('standard-function-definitions')
 
     console.log(result)
 })

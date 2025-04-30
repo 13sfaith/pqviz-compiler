@@ -1,6 +1,6 @@
 function foo() {
     let a = 10
-    bar()
+    bar("hello")
 }
 
 async function bar() {
