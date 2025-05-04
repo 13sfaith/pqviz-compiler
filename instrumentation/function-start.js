@@ -48,7 +48,8 @@ function getOwningFunctionName(path, t) {
       return parent.node.id.name;
     }
 
-    return 'anonymousFunction';
+    // return 'anonymousFunction';
+    currentPath = currentPath.parentPath;
 
   }
 
@@ -106,9 +107,54 @@ function createMonitorCall(obj, t) {
   let memberExpression = t.memberExpression(calleeObject, calleeProperty)
         
   let argObject = convertObjectIntoBabelArgument(obj, t)
-  let callExpression = t.callExpression(memberExpression, [argObject])
+  let monitorCall = t.callExpression(memberExpression, [argObject])
 
-  return callExpression
+  return monitorCall
+}
+
+function createArrowFunctionCallFromFunctionCall(currentCall, monitorCall, t) {
+  const callClone = t.cloneNode(currentCall.node, true)
+  const returnCall = t.returnStatement(callClone)
+
+  const arrowFunctionBody = t.blockStatement([t.expressionStatement(monitorCall), returnCall])
+  const arrowFunction = t.arrowFunctionExpression([], arrowFunctionBody)  
+  const arrowFunctionCall = t.callExpression(arrowFunction, [])
+
+  return arrowFunctionCall
+}
+
+function getNthParentPath(path, n) {
+  let current = path;
+  for (let i = 0; i < n; i++) {
+    if (!current.parentPath) return null;
+    current = current.parentPath;
+  }
+  return current;
+}
+
+function isMonitorCall(path, t) {
+  const callExpression = path.node
+  if (!t.isArrowFunctionExpression(callExpression.callee)) {
+    return false
+  }
+
+  const arrowFunctionExpression = callExpression.callee
+  if (arrowFunctionExpression.body.body.length != 2) {
+    return false
+  }
+  if (!t.isExpressionStatement(arrowFunctionExpression.body.body[0])) {
+    return false
+  }
+  if (!t.isCallExpression(arrowFunctionExpression.body.body[0].expression)) {
+    return false
+  }
+
+  const firstCall = arrowFunctionExpression.body.body[0].expression
+  if (firstCall.callee.object.name != monitorClass && firstCall.callee.property.name != monitorFunction) {
+    return false
+  }
+
+  return true
 }
 
 export default function ({ types: t }) {
@@ -117,6 +163,14 @@ export default function ({ types: t }) {
       CallExpression(path, state) {
         const functionToBeCalled = getCallingIdentifier(path, t)
         const functionThatIsCalling = getOwningFunctionName(path, t)
+
+        if (isMonitorCall(path, t)) {
+          return
+        }
+        let fourthParent = getNthParentPath(path, 4)
+        if (fourthParent && isMonitorCall(fourthParent, t)) {
+          return
+        }
 
         if (functionToBeCalled == 'console.log' || functionToBeCalled == `${monitorClass}.${monitorFunction}`) {
           return
@@ -132,7 +186,10 @@ export default function ({ types: t }) {
         }
         let monitorCall = createMonitorCall(obj, t)
 
-        path.findParent(p => p.isStatement()).insertBefore(monitorCall)
+        let arrowFunctionCall = createArrowFunctionCallFromFunctionCall(path, monitorCall, t)
+
+        path.replaceWith(arrowFunctionCall)
+        // path.findParent(p => p.isStatement()).insertBefore(monitorCall)
       },
       Program(path, state) {
         let obj = {

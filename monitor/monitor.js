@@ -1,7 +1,5 @@
 import fs from 'fs'
 
-// const calls = []
-
 function addEvent(props) {
     let events = []
     try {
