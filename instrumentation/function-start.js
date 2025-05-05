@@ -205,6 +205,17 @@ export default function ({ types: t }) {
         let importDeclaration = t.importDeclaration([importSpecifier], importLiteral)
         path.unshiftContainer('body', importDeclaration)
       },
+      ClassMethod(path, state) {
+        const functionName = path.node.key.name || "Unnamed Class Method"
+        let obj = {
+          "type": "functionStart",
+          "name": functionName,
+          "file": state.opts.fileName,
+          "line": path.node.loc.start.line,
+        }
+        const monitorCall = createMonitorCall(obj, t)
+        path.get('body').unshiftContainer('body', t.expressionStatement(monitorCall))
+      },
     }
   };
 }
