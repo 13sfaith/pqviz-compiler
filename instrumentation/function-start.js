@@ -16,6 +16,46 @@ function getCallingIdentifier(path, t) {
   return `${path.node.callee.object.name}.${path.node.callee.property.name}`
 }
 
+function findFunctionName(path, t) {
+  let current = path;
+
+  if (current.node?.id?.name != null) {
+    return current.node.id.name
+  }
+
+  while (current) {
+    const parent = current.parentPath;
+    if (!parent) break;
+
+    const node = parent.node;
+
+    if (
+      t.isVariableDeclarator(node) &&
+      t.isIdentifier(node.id)
+    ) {
+      return node.id.name;
+    }
+
+    if (
+      t.isObjectProperty(node) &&
+      t.isIdentifier(node.key)
+    ) {
+      return node.key.name;
+    }
+
+    if (
+      t.isAssignmentExpression(node) &&
+      t.isIdentifier(node.left)
+    ) {
+      return node.left.name;
+    }
+
+    current = parent;
+  }
+
+  return 'anonymous function';
+}
+
 function getOwningFunctionName(path, t) {
   let currentPath = path;
 
@@ -212,6 +252,17 @@ export default function ({ types: t }) {
           "name": functionName,
           "file": state.opts.fileName,
           "line": path.node.loc.start.line,
+        }
+        const monitorCall = createMonitorCall(obj, t)
+        path.get('body').unshiftContainer('body', t.expressionStatement(monitorCall))
+      },
+      FunctionDeclaration(path, state) {
+        let functionName = findFunctionName(path, t)
+        let obj = {
+          "type": "functionStart",
+          "name": functionName,
+          "file": state.opts.fileName,
+          "line": path.node.loc.start.line
         }
         const monitorCall = createMonitorCall(obj, t)
         path.get('body').unshiftContainer('body', t.expressionStatement(monitorCall))
