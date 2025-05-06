@@ -64,7 +64,8 @@ function getOwningFunctionName(path, t) {
       !currentPath.isFunctionDeclaration() &&
       !currentPath.isFunctionExpression() &&
       !currentPath.isArrowFunctionExpression() &&
-      !currentPath.isClassMethod()
+      !currentPath.isClassMethod() && 
+      !currentPath.isObjectMethod()
     ) {
       currentPath = currentPath.parentPath;
       continue;
@@ -77,7 +78,7 @@ function getOwningFunctionName(path, t) {
       return node.id.name;
     }
 
-    // Case 2: Function is a class method
+    // Case 2: Function is a class method or object method
     if (node.key?.name) {
       return node.key.name;
     }
