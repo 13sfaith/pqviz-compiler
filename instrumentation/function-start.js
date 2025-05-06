@@ -172,13 +172,20 @@ function getNthParentPath(path, n) {
   return current;
 }
 
-function isMonitorCall(path, t) {
+function isMonitorCall(path, t, isArrowFunctionVisitor = false) {
   const callExpression = path.node
-  if (!t.isArrowFunctionExpression(callExpression.callee)) {
+  let arrowFunctionExpression = null;
+  if (t.isArrowFunctionExpression(callExpression.callee)) {
+    arrowFunctionExpression = callExpression.callee
+  } else if (t.isArrowFunctionExpression(callExpression) && isArrowFunctionVisitor) {
+    arrowFunctionExpression = callExpression
+  } else {
     return false
   }
 
-  const arrowFunctionExpression = callExpression.callee
+  if (arrowFunctionExpression.body.body == undefined) {
+    return false
+  }
   if (arrowFunctionExpression.body.body.length != 2) {
     return false
   }
@@ -195,6 +202,17 @@ function isMonitorCall(path, t) {
   }
 
   return true
+}
+
+const generateFunctionStartMonitorCall = (functionName, fileName, lineNumber, t) => {
+  let obj = {
+    "type": "functionStart",
+    "name": functionName,
+    "file": fileName,
+    "line": lineNumber
+  }
+  const monitorCall = createMonitorCall(obj, t)
+  return monitorCall
 }
 
 export default function ({ types: t }) {
@@ -266,6 +284,27 @@ export default function ({ types: t }) {
         }
         const monitorCall = createMonitorCall(obj, t)
         path.get('body').unshiftContainer('body', t.expressionStatement(monitorCall))
+      },
+      ArrowFunctionExpression(path, state) {
+        if (isMonitorCall(path, t, true)) {
+          return
+        }
+
+        const body = path.get('body');
+        let functionName = findFunctionName(path, t)
+        const monitorCall = generateFunctionStartMonitorCall(functionName, state.opts.fileName, path.node.loc.start.line, t)
+
+        if (!t.isBlockStatement(body.node)) {
+          const originalExpr = body.node;
+          body.replaceWith(
+            t.blockStatement([
+              t.expressionStatement(monitorCall),
+              t.returnStatement(originalExpr)
+            ])
+          );
+        } else {
+          body.unshiftContainer('body', t.expressionStatement(monitorCall));
+        }
       },
     }
   };
