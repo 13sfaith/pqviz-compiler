@@ -274,6 +274,17 @@ export default function ({ types: t }) {
         const monitorCall = createMonitorCall(obj, t)
         path.get('body').unshiftContainer('body', t.expressionStatement(monitorCall))
       },
+      ObjectMethod(path, state) {
+        const functionName = path.node.key.name || "Unnamed Class Method"
+        let obj = {
+          "type": "functionStart",
+          "name": functionName,
+          "file": state.opts.fileName,
+          "line": path.node.loc.start.line,
+        }
+        const monitorCall = createMonitorCall(obj, t)
+        path.get('body').unshiftContainer('body', t.expressionStatement(monitorCall))
+      },
       FunctionDeclaration(path, state) {
         let functionName = findFunctionName(path, t)
         let obj = {
