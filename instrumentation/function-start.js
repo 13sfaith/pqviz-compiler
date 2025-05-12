@@ -153,11 +153,11 @@ function createMonitorCall(obj, t) {
   return monitorCall
 }
 
-function createArrowFunctionCallFromFunctionCall(currentCall, monitorCall, t) {
+function createArrowFunctionCallFromFunctionCall(currentCall, functionStartCall, t) {
   const callClone = t.cloneNode(currentCall.node, true)
   const returnCall = t.returnStatement(callClone)
 
-  const arrowFunctionBody = t.blockStatement([t.expressionStatement(monitorCall), returnCall])
+  const arrowFunctionBody = t.blockStatement([t.expressionStatement(functionStartCall), returnCall])
   const arrowFunction = t.arrowFunctionExpression([], arrowFunctionBody)  
   const arrowFunctionCall = t.callExpression(arrowFunction, [])
 
@@ -187,7 +187,7 @@ function isMonitorCall(path, t, isArrowFunctionVisitor = false) {
   if (arrowFunctionExpression.body.body == undefined) {
     return false
   }
-  if (arrowFunctionExpression.body.body.length != 2) {
+  if (arrowFunctionExpression.body.body.length < 2) {
     return false
   }
   if (!t.isExpressionStatement(arrowFunctionExpression.body.body[0])) {
@@ -243,9 +243,9 @@ export default function ({ types: t }) {
           "callingLine": path.node.loc.start.line,
           "args": path.node.arguments
         }
-        let monitorCall = createMonitorCall(obj, t)
+        let monitorFunctionCall = createMonitorCall(obj, t)
 
-        let arrowFunctionCall = createArrowFunctionCallFromFunctionCall(path, monitorCall, t)
+        let arrowFunctionCall = createArrowFunctionCallFromFunctionCall(path, monitorFunctionCall, t)
 
         path.replaceWith(arrowFunctionCall)
         // path.findParent(p => p.isStatement()).insertBefore(monitorCall)
