@@ -248,7 +248,6 @@ export default function ({ types: t }) {
         let arrowFunctionCall = createArrowFunctionCallFromFunctionCall(path, monitorFunctionCall, t)
 
         path.replaceWith(arrowFunctionCall)
-        // path.findParent(p => p.isStatement()).insertBefore(monitorCall)
       },
       Program(path, state) {
         let obj = {
