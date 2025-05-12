@@ -153,11 +153,15 @@ function createMonitorCall(obj, t) {
   return monitorCall
 }
 
-function createArrowFunctionCallFromFunctionCall(currentCall, functionStartCall, t) {
-  const callClone = t.cloneNode(currentCall.node, true)
-  const returnCall = t.returnStatement(callClone)
+function createArrowFunctionCallFromFunctionCall(currentCall, functionStartCall, functionReturnCall, t) {
 
-  const arrowFunctionBody = t.blockStatement([t.expressionStatement(functionStartCall), returnCall])
+
+  const callClone = t.cloneNode(currentCall.node, true)
+  const variableSet = t.variableDeclaration("let", [t.variableDeclarator(t.identifier('pqvizMonitorTmp'), callClone)])
+
+  const returnCall = t.returnStatement(t.identifier('pqvizMonitorTmp'))
+
+  const arrowFunctionBody = t.blockStatement([t.expressionStatement(functionStartCall), variableSet, returnCall])
   const arrowFunction = t.arrowFunctionExpression([], arrowFunctionBody)  
   const arrowFunctionCall = t.callExpression(arrowFunction, [])
 
@@ -176,6 +180,11 @@ function getNthParentPath(path, n) {
 function isMonitorCall(path, t, isArrowFunctionVisitor = false) {
   const callExpression = path.node
   let arrowFunctionExpression = null;
+
+  if (path.container?.id?.name == 'pqvizMonitorTmp') {
+    return true
+  }
+
   if (t.isArrowFunctionExpression(callExpression.callee)) {
     arrowFunctionExpression = callExpression.callee
   } else if (t.isArrowFunctionExpression(callExpression) && isArrowFunctionVisitor) {
@@ -198,7 +207,7 @@ function isMonitorCall(path, t, isArrowFunctionVisitor = false) {
   }
 
   const firstCall = arrowFunctionExpression.body.body[0].expression
-  if (firstCall.callee.object.name != monitorClass && firstCall.callee.property.name != monitorFunction) {
+  if (firstCall.callee.object.name != monitorClass) {
     return false
   }
 
@@ -235,7 +244,7 @@ export default function ({ types: t }) {
           return
         }
 
-        let obj = {
+        let callObj = {
           "type": "functionCall",
           "from": functionThatIsCalling,
           "to": functionToBeCalled,
@@ -243,9 +252,18 @@ export default function ({ types: t }) {
           "callingLine": path.node.loc.start.line,
           "args": path.node.arguments
         }
-        let monitorFunctionCall = createMonitorCall(obj, t)
+        let monitorFunctionCall = createMonitorCall(callObj, t)
 
-        let arrowFunctionCall = createArrowFunctionCallFromFunctionCall(path, monitorFunctionCall, t)
+        let returnObj = {
+          "type": "functionReturn",
+          "from": functionThatIsCalling,
+          "to": functionToBeCalled,
+          "callingFile": state.opts.fileName,
+          "callingLine": path.node.loc.start.line,
+        }
+        let monitorReturnCall = createMonitorCall(returnObj, t)
+
+        let arrowFunctionCall = createArrowFunctionCallFromFunctionCall(path, monitorFunctionCall, monitorReturnCall, t)
 
         path.replaceWith(arrowFunctionCall)
       },
