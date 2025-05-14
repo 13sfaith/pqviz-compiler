@@ -1,0 +1,65 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Standard Functions Get Instrumented 1`] = `
+"import pqvizMonitor from "./pqviz/monitor.js";
+pqvizMonitor.addEvent({
+  "type": "moduleStart",
+  "file": "standard-function-definitions"
+})
+function foo() {
+  pqvizMonitor.addEvent({
+    "type": "functionStart",
+    "name": "foo",
+    "file": "standard-function-definitions",
+    "line": 1
+  });
+  let a = 10;
+  (() => {
+    pqvizMonitor.addEvent({
+      "type": "functionCall",
+      "from": "foo",
+      "to": "bar",
+      "callingFile": "standard-function-definitions",
+      "callingLine": 3,
+      "args": ["Unimplemented Literal Type: object"]
+    });
+    let pqvizMonitorTmp = bar(a);
+    pqvizMonitor.addEvent({
+      "type": "functionReturn",
+      "from": "foo",
+      "to": "bar",
+      "callingFile": "standard-function-definitions",
+      "callingLine": 3
+    });
+    return pqvizMonitorTmp;
+  })();
+}
+async function bar(val) {
+  pqvizMonitor.addEvent({
+    "type": "functionStart",
+    "name": "bar",
+    "file": "standard-function-definitions",
+    "line": 6
+  });
+  console.log("hello: ", val);
+}
+(() => {
+  pqvizMonitor.addEvent({
+    "type": "functionCall",
+    "from": "TLS",
+    "to": "foo",
+    "callingFile": "standard-function-definitions",
+    "callingLine": 10,
+    "args": []
+  });
+  let pqvizMonitorTmp = foo();
+  pqvizMonitor.addEvent({
+    "type": "functionReturn",
+    "from": "TLS",
+    "to": "foo",
+    "callingFile": "standard-function-definitions",
+    "callingLine": 10
+  });
+  return pqvizMonitorTmp;
+})();"
+`;

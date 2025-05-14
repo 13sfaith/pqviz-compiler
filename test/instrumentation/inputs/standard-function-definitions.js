@@ -1,20 +1,10 @@
 function foo() {
     let a = 10
-    bar("hello")
+    bar(a)
 }
 
-async function bar() {
-    let b = 20
-    let someValue = foo()
+async function bar(val) {
+    console.log("hello: ", val)
 }
 
-class BlankSlate {
-    inAClass() {
-        let c = 30
-        this.inAClassButWeirder()
-    }
-
-    async inAClassButWeirder() {
-        let d = 40
-    }
-}
+foo()

@@ -61,12 +61,6 @@ await useTmpDir(async (dir) => {
   // symlink node_modules
   await createSymlink("node_modules", path.join(dir, "node_modules"))
 
-  // symlink package.json
-  /*
-  await createSymlink("package.json", path.join(dir, "package.json"), "file")
-  await createSymlink("package-lock.json", path.join(dir, "package-lock.json"), "file")
-  */
-
   // bring in the monitor! 🦎
   // makeDirectory(dir, paths.monitorDirectory)
   await createSymlink(paths.monitorDirectory, path.join(dir, "pqviz"))
