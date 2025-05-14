@@ -161,7 +161,7 @@ function createArrowFunctionCallFromFunctionCall(currentCall, functionStartCall,
 
   const returnCall = t.returnStatement(t.identifier('pqvizMonitorTmp'))
 
-  const arrowFunctionBody = t.blockStatement([t.expressionStatement(functionStartCall), variableSet, returnCall])
+  const arrowFunctionBody = t.blockStatement([t.expressionStatement(functionStartCall), variableSet, t.expressionStatement(functionReturnCall), returnCall])
   const arrowFunction = t.arrowFunctionExpression([], arrowFunctionBody)  
   const arrowFunctionCall = t.callExpression(arrowFunction, [])
 

@@ -1,5 +1,6 @@
 import babel from "@babel/core";
-import plugin from "./instrumentation/function-start.js";
+import functionStartPlugin from "./instrumentation/function-start.js";
+import extractFunctionArgPlugin from "./instrumentation/extract-function-argument.js";
 import fastGlob from "fast-glob";
 import { useTmpDir } from "use-tmpdir";
 import fs from "fs";
@@ -48,7 +49,7 @@ await useTmpDir(async (dir) => {
     // perform transform
     const originalCode = fs.readFileSync(fileName, "utf8");
     var { code } = babel.transformSync(originalCode, {
-      plugins: [[plugin, { fileName: fileName }]],
+      plugins: [[extractFunctionArgPlugin, { fileName: fileName }]],
       configFile: false
     });
     fs.writeFileSync(path.join(dir, fileName), code)
