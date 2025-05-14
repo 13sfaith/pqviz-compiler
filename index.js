@@ -49,7 +49,10 @@ await useTmpDir(async (dir) => {
     // perform transform
     const originalCode = fs.readFileSync(fileName, "utf8");
     var { code } = babel.transformSync(originalCode, {
-      plugins: [[extractFunctionArgPlugin, { fileName: fileName }]],
+      plugins: [
+        [extractFunctionArgPlugin, { fileName: fileName }],
+        [functionStartPlugin, {fileName: fileName }]
+      ],
       configFile: false
     });
     fs.writeFileSync(path.join(dir, fileName), code)

@@ -263,7 +263,7 @@ export default function ({ types: t }) {
         }
         let monitorReturnCall = createMonitorCall(returnObj, t)
 
-        let arrowFunctionCall = createArrowFunctionCallFromFunctionCall(path, monitorFunctionCall, monitorReturnCall, t)
+       let arrowFunctionCall = createArrowFunctionCallFromFunctionCall(path, monitorFunctionCall, monitorReturnCall, t)
 
         path.replaceWith(arrowFunctionCall)
       },
