@@ -207,7 +207,7 @@ function isMonitorCall(path, t, isArrowFunctionVisitor = false) {
   }
 
   const firstCall = arrowFunctionExpression.body.body[0].expression
-  if (firstCall.callee.object.name != monitorClass) {
+  if (firstCall?.callee?.object?.name != monitorClass) {
     return false
   }
 

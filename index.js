@@ -1,14 +1,12 @@
-import babel from "@babel/core";
-import functionStartPlugin from "./instrumentation/function-start.js";
-import extractFunctionArgPlugin from "./instrumentation/extract-function-argument.js";
-import fastGlob from "fast-glob";
+import runInstrumentation from "./instrumentation/run-instrumentation.js";
 import { useTmpDir } from "use-tmpdir";
-import fs from "fs";
 import fsPromises from "fs/promises";
-import path from 'path';
 import { exec } from 'child_process';
+import fastGlob from "fast-glob";
 import { promisify } from 'util';
 import { paths } from '#config';
+import path from 'path';
+import fs from "fs";
 
 const execAsync = promisify(exec);
 
@@ -40,21 +38,23 @@ async function createSymlink(target, linkPath, type = 'file') {
 let calls = []
 
 await useTmpDir(async (dir) => {
-  let fileNames = await fastGlob.glob(["**/**.js"], { ignore: ["node_modules/**"]})
+  let jsonFiles = await fastGlob.glob(["**/**.json"], { ignore: ["node_modules/**"]})
+  let codeFiles = await fastGlob.glob(["**/**.js", "**/**.mjs", "**/**.cjs"], { ignore: ["node_modules/**"]})
 
-  for (let i = 0; i < fileNames.length; i++) {
-    let fileName = fileNames[i]
+  for (let i = 0; i < jsonFiles.length; i++) {
+    let fileName = jsonFiles[i]
+    makeDirectory(dir, fileName)
+    const originalJson = fs.readFileSync(fileName, "utf8");
+    fs.writeFileSync(path.join(dir, fileName), originalJson)
+  }
+
+  for (let i = 0; i < codeFiles.length; i++) {
+    let fileName = codeFiles[i]
     makeDirectory(dir, fileName)
 
     // perform transform
     const originalCode = fs.readFileSync(fileName, "utf8");
-    var { code } = babel.transformSync(originalCode, {
-      plugins: [
-        [extractFunctionArgPlugin, { fileName: fileName }],
-        [functionStartPlugin, {fileName: fileName }]
-      ],
-      configFile: false
-    });
+    let code = runInstrumentation(originalCode, fileName)
     fs.writeFileSync(path.join(dir, fileName), code)
   }
 
@@ -62,8 +62,10 @@ await useTmpDir(async (dir) => {
   await createSymlink("node_modules", path.join(dir, "node_modules"))
 
   // symlink package.json
+  /*
   await createSymlink("package.json", path.join(dir, "package.json"), "file")
   await createSymlink("package-lock.json", path.join(dir, "package-lock.json"), "file")
+  */
 
   // bring in the monitor! 🦎
   // makeDirectory(dir, paths.monitorDirectory)
@@ -81,13 +83,14 @@ await useTmpDir(async (dir) => {
     console.error(stderr)
 
 
-    const traceJson = fs.readFileSync(path.join(dir, 'trace.json'), "utf8");
-    calls = JSON.parse(traceJson)
 
   } catch (err) {
     console.error(err)
   }
    
+  const traceJson = fs.readFileSync(path.join(dir, 'trace.json'), "utf8");
+  calls = JSON.parse(traceJson)
 })
+
 
 fs.writeFileSync('trace.json', JSON.stringify(calls))
